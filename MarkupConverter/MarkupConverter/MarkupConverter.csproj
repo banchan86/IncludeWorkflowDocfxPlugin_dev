@@ -1,14 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>MarkupConverter</AssemblyName>
-    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
-    <SchemaVersion>2.0</SchemaVersion>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <ProjectGuid>{DC692379-518F-4241-9BBA-4E3F4A9BCE13}</ProjectGuid>
     <TargetFramework>net8.0</TargetFramework>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <OldToolsVersion>3.5</OldToolsVersion>
     <OutputType>Library</OutputType>
     <StartupObject>
     </StartupObject>
@@ -27,45 +19,21 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <OutputPath>bin\Debug\</OutputPath>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <OutputPath>bin\Release\</OutputPath>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core">
+    <Reference Update="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Data" />
-    <Reference Include="UIAutomationProvider" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="UIAutomationTypes" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="HtmlToRtfConverter.cs" />
-    <Compile Include="HtmlCssParser.cs" />
-    <Compile Include="HtmlFromXamlConverter.cs" />
-    <Compile Include="HtmlLexicalAnalyzer.cs" />
-    <Compile Include="HtmlParser.cs" />
-    <Compile Include="HtmlSchema.cs" />
-    <Compile Include="HtmlTokenType.cs" />
-    <Compile Include="HtmlToXamlConverter.cs" />
-    <Compile Include="MarkupConverter.cs" />
-    <Compile Include="RtfToHtmlConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
