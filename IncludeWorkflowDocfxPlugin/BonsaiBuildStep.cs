@@ -6,8 +6,8 @@ namespace BonsaiDocumentProcessors
     using System.Composition;
     using System.Threading.Tasks;
     using System.Threading.Tasks.Schedulers;
+    using System.Xml.Linq; //read .bonsai XML files
 
-    using MarkupConverter;
     using Docfx.Plugins;
 
     [Export(nameof(BonsaiDocumentProcessor), typeof(IDocumentBuildStep))]
@@ -18,7 +18,7 @@ namespace BonsaiDocumentProcessors
 
         public void Build(FileModel model, IHostService host)
         {
-            string content = (string)((Dictionary<string, object>)model.Content)["conceptual"];
+            XDocument xmlDoc = (XDocument)((Dictionary<string, object>)model.Content)["conceptual"]
             content = _taskFactory.StartNew(() => BonsaiToHtmlConverter.ConvertBonsaiToHtml(content)).Result;
             ((Dictionary<string, object>)model.Content)["conceptual"] = content;
         }
