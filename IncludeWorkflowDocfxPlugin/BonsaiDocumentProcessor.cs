@@ -63,11 +63,10 @@
         }
         #endregion
 
-        // to update later with custom bonsai post processor if necessary
-        // #region UpdateHref
-        // public void UpdateHref(FileModel model, IDocumentBuildContext context)
-        // {
-        // }
-        // #endregion
+        #region UpdateHref
+        public void UpdateHref(FileModel model, IDocumentBuildContext context)
+        {
+        }
+        #endregion
     }
 }

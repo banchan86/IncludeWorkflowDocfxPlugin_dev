@@ -3,56 +3,46 @@
     using System;
     using System.IO;
     using System.Text;
+    using System.Xml.Linq; //read .bonsai XML files
 
-    public static class RtfToHtmlConverter
+    public static class BonsaiToHtmlConverter
     {
-        private const string FlowDocumentFormat = "<FlowDocument>{0}</FlowDocument>";
-
-        public static string ConvertRtfToHtml(string rtfText)
+        public static string ConvertBonsaiToHtml(string xmlContent)
         {
-            var xamlText = string.Format(FlowDocumentFormat, ConvertRtfToXaml(rtfText));
+            // Load XML content using XDocument
+            var xmlDoc = XDocument.Parse(xmlContent);
 
-            return HtmlFromXamlConverter.ConvertXamlToHtml(xamlText, false);
-        }
+            // Start building the HTML content
+            StringBuilder htmlBuilder = new StringBuilder();
+            htmlBuilder.Append("<html><head><title>Bonsai Workflow</title></head><body>");
+            htmlBuilder.Append("<h1>Bonsai Workflow Documentation</h1>");
 
-        private static string ConvertRtfToXaml(string rtfText)
-        {
-            var richTextBox = new RichTextBox();
-            if (string.IsNullOrEmpty(rtfText)) return "";
-
-            var textRange = new TextRange(richTextBox.Document.ContentStart, richTextBox.Document.ContentEnd);
-
-            //Create a MemoryStream of the Rtf content
-
-            using (var rtfMemoryStream = new MemoryStream())
+            // Extract the description if available
+            var description = xmlDoc.Root.Element("Description")?.Value;
+            if (!string.IsNullOrEmpty(description))
             {
-                using (var rtfStreamWriter = new StreamWriter(rtfMemoryStream))
-                {
-                    rtfStreamWriter.Write(rtfText);
-                    rtfStreamWriter.Flush();
-                    rtfMemoryStream.Seek(0, SeekOrigin.Begin);
-
-                    //Load the MemoryStream into TextRange ranging from start to end of RichTextBox.
-                    textRange.Load(rtfMemoryStream, DataFormats.Rtf);
-                }
+                htmlBuilder.Append($"<h2>Description</h2><p>{description}</p>");
             }
 
-            using (var rtfMemoryStream = new MemoryStream())
+            // Extract nodes and append them as HTML
+            var nodes = xmlDoc.Root.Descendants("Nodes");
+            htmlBuilder.Append("<h2>Nodes</h2><ul>");
+            foreach (var node in nodes.Descendants())
             {
+                var nodeType = node.Name.LocalName;
+                htmlBuilder.Append($"<li>Node Type: {nodeType}");
 
-                textRange = new TextRange(richTextBox.Document.ContentStart, richTextBox.Document.ContentEnd);
-                textRange.Save(rtfMemoryStream, DataFormats.Xaml);
-                rtfMemoryStream.Seek(0, SeekOrigin.Begin);
-                using (var rtfStreamReader = new StreamReader(rtfMemoryStream))
+                // Extract and add attributes if available
+                foreach (var attribute in node.Attributes())
                 {
-                    return rtfStreamReader.ReadToEnd();
+                    htmlBuilder.Append($"<br>{attribute.Name}: {attribute.Value}");
                 }
+                htmlBuilder.Append("</li>");
             }
+            htmlBuilder.Append("</ul>");
 
+            htmlBuilder.Append("</body></html>");
+            return htmlBuilder.ToString();
         }
-
-
-
-
     }
 }
