@@ -1,12 +1,9 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-
-namespace BonsaiDocumentProcessors
+﻿namespace BonsaiDocumentProcessors
 {
+    using System;
+    using System.IO;
+    using System.Text;
+
     public static class RtfToHtmlConverter
     {
         private const string FlowDocumentFormat = "<FlowDocument>{0}</FlowDocument>";
