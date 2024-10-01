@@ -18,8 +18,8 @@ namespace BonsaiDocumentProcessors
 
         public void Build(FileModel model, IHostService host)
         {
-            XDocument xmlDoc = (XDocument)((Dictionary<string, object>)model.Content)["conceptual"]
-            content = _taskFactory.StartNew(() => BonsaiToHtmlConverter.ConvertBonsaiToHtml(content)).Result;
+            XDocument xmlDoc = (XDocument)((Dictionary<string, object>)model.Content)["conceptual"];
+            string content = _taskFactory.StartNew(() => BonsaiToHtmlConverter.ConvertBonsaiToHtml(xmlDoc.ToString())).Result;
             ((Dictionary<string, object>)model.Content)["conceptual"] = content;
         }
         #endregion
