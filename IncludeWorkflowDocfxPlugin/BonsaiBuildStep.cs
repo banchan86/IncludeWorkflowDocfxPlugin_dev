@@ -4,8 +4,6 @@ namespace BonsaiDocumentProcessors
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Composition;
-    using System.Threading.Tasks;
-    using System.Threading.Tasks.Schedulers;
     using System.Xml.Linq; //read .bonsai XML files
 
     using Docfx.Plugins;
@@ -14,12 +12,11 @@ namespace BonsaiDocumentProcessors
     public class BonsaiBuildStep : IDocumentBuildStep
     {
         #region Build
-        private readonly TaskFactory _taskFactory = new TaskFactory(new StaTaskScheduler(1));
 
         public void Build(FileModel model, IHostService host)
         {
             XDocument xmlDoc = (XDocument)((Dictionary<string, object>)model.Content)["conceptual"];
-            string content = _taskFactory.StartNew(() => BonsaiToHtmlConverter.ConvertBonsaiToHtml(xmlDoc.ToString())).Result;
+            string content = BonsaiToHtmlConverter.ConvertBonsaiToHtml(xmlDoc.ToString());
             ((Dictionary<string, object>)model.Content)["conceptual"] = content;
         }
         #endregion
