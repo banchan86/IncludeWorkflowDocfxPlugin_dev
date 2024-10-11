@@ -5,9 +5,9 @@
     using System.Text;
     using System.Xml.Linq; //read .bonsai XML files
 
-    public static class BonsaiToHtmlConverter
+    public static class BonsaiToYamlConverter
     {
-        public static string ConvertBonsaiToHtml(string xmlContent)
+        public static string ConvertBonsaiToYaml(string xmlContent)
         {
             // Load XML content using XDocument
             var xmlDoc = XDocument.Parse(xmlContent);

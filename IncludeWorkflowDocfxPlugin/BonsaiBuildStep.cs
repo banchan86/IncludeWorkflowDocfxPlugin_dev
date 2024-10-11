@@ -16,7 +16,7 @@ namespace BonsaiDocumentProcessors
         public void Build(FileModel model, IHostService host)
         {
             XDocument xmlDoc = (XDocument)((Dictionary<string, object>)model.Content)["conceptual"];
-            string content = BonsaiToHtmlConverter.ConvertBonsaiToHtml(xmlDoc.ToString());
+            string content = BonsaiToYamlConverter.ConvertBonsaiToYaml(xmlDoc.ToString());
             ((Dictionary<string, object>)model.Content)["conceptual"] = content;
         }
         #endregion
