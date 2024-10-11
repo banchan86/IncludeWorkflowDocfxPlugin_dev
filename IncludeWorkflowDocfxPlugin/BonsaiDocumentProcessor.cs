@@ -75,7 +75,7 @@
                 .Replace('\\', '.'); // Handle Windows-style backslashes explicitly
 
             // Set the output path for the HTML file in the api/ folder (all flattened into api/)
-            string outputPath = Path.Combine("api", fileNameWithDots + ".html");
+            string outputPath = Path.Combine("api", fileNameWithDots + ".yml");
 
             // Write the transformed HTML content to the output path
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath)); // Ensure the api/ directory exists
@@ -83,7 +83,7 @@
 
             return new SaveResult
             {
-                DocumentType = "Conceptual",
+                DocumentType = "ManagedReference",
                 FileWithoutExtension = Path.ChangeExtension(model.File, null),
             };
         }
