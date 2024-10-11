@@ -55,6 +55,32 @@
         #region Save
         public SaveResult Save(FileModel model)
         {
+            // The docfx plugin directly converts .bonsai files to .html files and saves it in _site/api
+            // The next few lines instead saves it to the api/ folder
+            // Hopefully we can generate mref YAML files instead (so they can share the same template)
+
+            // Cast model.Content to a Dictionary<string, object>
+            var contentDict = (Dictionary<string, object>)model.Content;
+
+            // Strip the "api/" prefix from model.File if it starts with it
+            string apiFolder = "api";
+            string relativePath = model.File.StartsWith(apiFolder)
+                ? model.File.Substring(apiFolder.Length + 1)  // Remove 'api/' from the path
+                : model.File;
+
+            // Replace directory separators (like / or \) with dots and remove the .bonsai extension
+            string fileNameWithDots = Path.ChangeExtension(relativePath, null)
+                .Replace(Path.DirectorySeparatorChar, '.')
+                .Replace('/', '.')   // Also handle the case for '/'
+                .Replace('\\', '.'); // Handle Windows-style backslashes explicitly
+
+            // Set the output path for the HTML file in the api/ folder (all flattened into api/)
+            string outputPath = Path.Combine("api", fileNameWithDots + ".html");
+
+            // Write the transformed HTML content to the output path
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath)); // Ensure the api/ directory exists
+            File.WriteAllText(outputPath, contentDict["conceptual"].ToString()); // Save the content as an HTML file
+
             return new SaveResult
             {
                 DocumentType = "Conceptual",
