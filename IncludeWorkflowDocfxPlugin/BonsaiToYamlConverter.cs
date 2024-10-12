@@ -1,6 +1,7 @@
 ﻿namespace BonsaiDocumentProcessors
 {
     using System.Xml.Linq; //read .bonsai XML files
+    using System.Linq; 
     using YamlDotNet.Serialization; // To serialize to YAML
     using System.Collections.Generic; // To handle node attributes
 
@@ -11,32 +12,65 @@
             // Load XML content using XDocument
             var xmlDoc = XDocument.Parse(xmlContent);
 
-            // Get the XML namespace (xmlns="https://bonsai-rx.org/2018/workflow")
+            // Extract the XML namespace (xmlns)
             XNamespace ns = xmlDoc.Root.GetDefaultNamespace();
 
-            // Use file name as the name
-            var name = fileNameWithoutExtension;
+            // Extract the XML prefix namespace for properties (xmlns:xsi)
+            XNamespace xsiNamespace = xmlDoc.Root.GetNamespaceOfPrefix("xsi");
 
             // Use UID as uid
             var uid = UID;
 
+            // Use file name as the name
+            var name = fileNameWithoutExtension;
+
+            // extract namespace
+            string @namespace = uid.Replace("." + name, "");
+
             // Extract the description from the .bonsai XML
             var description = xmlDoc.Root.Element(ns + "Description")?.Value ?? "No description available.";
 
-            // Create a YAML-compatible object with the extracted information
-            var yamlItem = new
+            // Create a YAML-compatible item for the operator with the extracted information
+            var operatorItem = new
             {
-                uid = uid,  // Unique identifier
+                uid = uid,  
+                id = name,
+                parent = @namespace,
                 name = name,
+                nameWithType = name,
+                fullName = uid,
+                type = "Class",
+                @namespace = @namespace,
                 summary = description,
                 // Additional fields...
             };
 
-            // Wrap the item in an `items` list (like in DocFX)
-            var yamlData = new
-            {
-                items = new[] { yamlItem }
-            };
+            // Create YAML-compatible items for the properties
+            var propertyItems = xmlDoc.Descendants(ns + "Expression")
+                .Where(x => (string)x.Attribute(XName.Get("type", xsiNamespace.NamespaceName)) == "ExternalizedMapping")
+                .SelectMany(x => x.Elements(ns + "Property"))
+                .Select(p => new
+                {
+                    uid = $"{uid}.{p.Attribute("Name")?.Value}",
+                    id = (string)p.Attribute("Name") ?? "Unnamed",
+                    parent = uid,
+                    name = (string)p.Attribute("Name") ?? "Unnamed",
+                    summary = (string)p.Attribute("Description") ?? "No description available.",
+                    type = "Property",
+                })
+                .ToList();
+
+            // Combine the operator item and property items into a single list
+            var allItems = new List<object> { operatorItem }.Concat(propertyItems).ToList();
+
+            // Create the final YAML structure
+            var yamlData = new { items = allItems };
+
+            // // Wrap the items in an `items` list (like in DocFX)
+            // var yamlData = new
+            // {
+            //     items = new[] { yamlItem }
+            // };
 
             // Serialize to YAML using YamlDotNet
             var serializer = new SerializerBuilder().Build();
