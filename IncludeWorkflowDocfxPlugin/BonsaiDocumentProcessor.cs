@@ -37,12 +37,25 @@
         #region Load
         public FileModel Load(FileAndType file, ImmutableDictionary<string, object> metadata)
         {
+
             var content = new Dictionary<string, object>
             {
                 ["conceptual"] = XDocument.Load(Path.Combine(file.BaseDir, file.File)),
                 ["type"] = "Conceptual",
                 ["path"] = file.File,
             };
+
+            #region ExtractUID
+            // Strip src prefix from file.File
+            string relativePath = file.File.Replace("../src/", "");
+
+            // Create UID from folder structure
+            string fileNameWithDots = Path.ChangeExtension(relativePath, null).Replace(Path.DirectorySeparatorChar, '.');
+
+            // Store the computed UID for later use
+            content["UID"] = fileNameWithDots; 
+            #endregion
+
             var localPathFromRoot = PathUtility.MakeRelativePath(EnvironmentContext.BaseDirectory, EnvironmentContext.FileAbstractLayer.GetPhysicalPath(file.File));
 
             return new FileModel(file, content)
@@ -55,31 +68,18 @@
         #region Save
         public SaveResult Save(FileModel model)
         {
-            // The docfx plugin directly converts .bonsai files to .html files and saves it in _site/api
-            // The next few lines instead saves it to the api/ folder
-            // Hopefully we can generate mref YAML files instead (so they can share the same template)
-
+            
+            #region SaveYaml
             // Cast model.Content to a Dictionary<string, object>
             var contentDict = (Dictionary<string, object>)model.Content;
+            
+            // make filename for yml file
+            string outputPath = Path.Combine("api", (string)contentDict["UID"] + ".yml");
 
-            // Strip the "api/" prefix from model.File if it starts with it
-            string apiFolder = "api";
-            string relativePath = model.File.StartsWith(apiFolder)
-                ? model.File.Substring(apiFolder.Length + 1)  // Remove 'api/' from the path
-                : model.File;
-
-            // Replace directory separators (like / or \) with dots and remove the .bonsai extension
-            string fileNameWithDots = Path.ChangeExtension(relativePath, null)
-                .Replace(Path.DirectorySeparatorChar, '.')
-                .Replace('/', '.')   // Also handle the case for '/'
-                .Replace('\\', '.'); // Handle Windows-style backslashes explicitly
-
-            // Set the output path for the HTML file in the api/ folder (all flattened into api/)
-            string outputPath = Path.Combine("api", fileNameWithDots + ".yml");
-
-            // Write the transformed HTML content to the output path
+            // Write the transformed YAML content to the output path
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath)); // Ensure the api/ directory exists
-            File.WriteAllText(outputPath, contentDict["conceptual"].ToString()); // Save the content as an HTML file
+            File.WriteAllText(outputPath, contentDict["conceptual"].ToString()); // Save the content as an yaml file
+            #endregion
 
             return new SaveResult
             {

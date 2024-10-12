@@ -6,7 +6,7 @@
 
     public static class BonsaiToYamlConverter
     {
-        public static string ConvertBonsaiToYaml(string xmlContent, string fileNameWithoutExtension)
+        public static string ConvertBonsaiToYaml(string xmlContent, string fileNameWithoutExtension, string UID)
         {
             // Load XML content using XDocument
             var xmlDoc = XDocument.Parse(xmlContent);
@@ -17,13 +17,16 @@
             // Use file name as the name
             var name = fileNameWithoutExtension;
 
+            // Use UID as uid
+            var uid = UID;
+
             // Extract the description from the .bonsai XML
             var description = xmlDoc.Root.Element(ns + "Description")?.Value ?? "No description available.";
 
             // Create a YAML-compatible object with the extracted information
             var yamlItem = new
             {
-                uid = name,  // Unique identifier
+                uid = uid,  // Unique identifier
                 name = name,
                 summary = description,
                 // Additional fields...
