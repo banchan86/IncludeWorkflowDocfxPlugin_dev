@@ -21,12 +21,18 @@
             var description = xmlDoc.Root.Element(ns + "Description")?.Value ?? "No description available.";
 
             // Create a YAML-compatible object with the extracted information
-            var yamlData = new
+            var yamlItem = new
             {
                 uid = name,  // Unique identifier
                 name = name,
                 summary = description,
                 // Additional fields...
+            };
+
+            // Wrap the item in an `items` list (like in DocFX)
+            var yamlData = new
+            {
+                items = new[] { yamlItem }
             };
 
             // Serialize to YAML using YamlDotNet
