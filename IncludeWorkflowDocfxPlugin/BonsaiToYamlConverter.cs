@@ -1,48 +1,40 @@
 ﻿namespace BonsaiDocumentProcessors
 {
-    using System;
-    using System.IO;
-    using System.Text;
     using System.Xml.Linq; //read .bonsai XML files
+    using YamlDotNet.Serialization; // To serialize to YAML
+    using System.Collections.Generic; // To handle node attributes
 
     public static class BonsaiToYamlConverter
     {
-        public static string ConvertBonsaiToYaml(string xmlContent)
+        public static string ConvertBonsaiToYaml(string xmlContent, string fileNameWithoutExtension)
         {
             // Load XML content using XDocument
             var xmlDoc = XDocument.Parse(xmlContent);
 
-            // Start building the HTML content
-            StringBuilder htmlBuilder = new StringBuilder();
-            htmlBuilder.Append("<html><head><title>Bonsai Workflow</title></head><body>");
-            htmlBuilder.Append("<h1>Bonsai Workflow Documentation</h1>");
+            // Get the XML namespace (xmlns="https://bonsai-rx.org/2018/workflow")
+            XNamespace ns = xmlDoc.Root.GetDefaultNamespace();
 
-            // Extract the description if available
-            var description = xmlDoc.Root.Element("Description")?.Value;
-            if (!string.IsNullOrEmpty(description))
+            // Use file name as the name
+            var name = fileNameWithoutExtension;
+
+            // Extract the description from the .bonsai XML
+            var description = xmlDoc.Root.Element(ns + "Description")?.Value ?? "No description available.";
+
+            // Create a YAML-compatible object with the extracted information
+            var yamlData = new
             {
-                htmlBuilder.Append($"<h2>Description</h2><p>{description}</p>");
-            }
+                uid = name,  // Unique identifier
+                name = name,
+                summary = description,
+                // Additional fields...
+            };
 
-            // Extract nodes and append them as HTML
-            var nodes = xmlDoc.Root.Descendants("Nodes");
-            htmlBuilder.Append("<h2>Nodes</h2><ul>");
-            foreach (var node in nodes.Descendants())
-            {
-                var nodeType = node.Name.LocalName;
-                htmlBuilder.Append($"<li>Node Type: {nodeType}");
+            // Serialize to YAML using YamlDotNet
+            var serializer = new SerializerBuilder().Build();
+            string yamlContent = serializer.Serialize(yamlData);
 
-                // Extract and add attributes if available
-                foreach (var attribute in node.Attributes())
-                {
-                    htmlBuilder.Append($"<br>{attribute.Name}: {attribute.Value}");
-                }
-                htmlBuilder.Append("</li>");
-            }
-            htmlBuilder.Append("</ul>");
-
-            htmlBuilder.Append("</body></html>");
-            return htmlBuilder.ToString();
+            // Add "### YamlMime:ManagedReference" to the top of the YAML content
+            return $"### YamlMime:ManagedReference\n{yamlContent}";
         }
     }
 }

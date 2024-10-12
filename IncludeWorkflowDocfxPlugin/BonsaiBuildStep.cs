@@ -16,7 +16,14 @@ namespace BonsaiDocumentProcessors
         public void Build(FileModel model, IHostService host)
         {
             XDocument xmlDoc = (XDocument)((Dictionary<string, object>)model.Content)["conceptual"];
-            string content = BonsaiToYamlConverter.ConvertBonsaiToYaml(xmlDoc.ToString());
+            
+            // Get the file name without the extension from model.File
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(model.File);
+
+            // Use BonsaiToYamlConverter to convert the XML to YAML format
+            string content = BonsaiToYamlConverter.ConvertBonsaiToYaml(xmlDoc.ToString(), fileNameWithoutExtension);
+
+            // Store the generated YAML content in the model (to be saved later)
             ((Dictionary<string, object>)model.Content)["conceptual"] = content;
         }
         #endregion
