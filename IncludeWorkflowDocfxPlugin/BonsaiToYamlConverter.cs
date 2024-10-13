@@ -30,20 +30,7 @@
             // Extract the description from the .bonsai XML
             var description = xmlDoc.Root.Element(ns + "Description")?.Value ?? "No description available.";
 
-            // Create a YAML-compatible item for the operator with the extracted information
-            var operatorItem = new
-            {
-                uid = uid,  
-                id = name,
-                parent = @namespace,
-                name = name,
-                nameWithType = name,
-                fullName = uid,
-                type = "Class",
-                @namespace = @namespace,
-                summary = description,
-                // Additional fields...
-            };
+
 
             // Create YAML-compatible items for the properties
             var propertyItems = xmlDoc.Descendants(ns + "Expression")
@@ -71,6 +58,25 @@
                 .GroupBy(p => p.name)
                 .Select(g => g.OrderByDescending(p => p.summary != "No description available.").First())
                 .ToList();
+
+            // Create the list of child UIDs to be included in the parent item
+            var childUids = propertyItems.Select(p => p.uid).ToList();
+
+            // Create a YAML-compatible item for the operator with the extracted information
+            var operatorItem = new
+            {
+                uid = uid,  
+                id = name,
+                parent = @namespace,
+                children = childUids,
+                name = name,
+                nameWithType = name,
+                fullName = uid,
+                type = "Class",
+                @namespace = @namespace,
+                summary = description,
+                // Additional fields...
+            };
 
             // Combine the operator item and property items into a single list
             var allItems = new List<object> { operatorItem }.Concat(propertyItems).ToList();
