@@ -49,15 +49,27 @@
             var propertyItems = xmlDoc.Descendants(ns + "Expression")
                 .Where(x => (string)x.Attribute(XName.Get("type", xsiNamespace.NamespaceName)) == "ExternalizedMapping")
                 .SelectMany(x => x.Elements(ns + "Property"))
-                .Select(p => new
+                .Select(p => 
                 {
-                    uid = $"{uid}.{p.Attribute("Name")?.Value}",
-                    id = (string)p.Attribute("Name") ?? "Unnamed",
-                    parent = uid,
-                    name = (string)p.Attribute("Name") ?? "Unnamed",
-                    summary = (string)p.Attribute("Description") ?? "No description available.",
-                    type = "Property",
+                    // Use DisplayName if it exists, otherwise fall back to Name
+                    string propertyName = p.Attribute("DisplayName")?.Value 
+                              ?? p.Attribute("Name")?.Value 
+                              ?? "Unnamed";
+
+                    return new
+                    {
+                        uid = $"{uid}.{propertyName}",
+                        id = propertyName,
+                        parent = uid,
+                        name = propertyName,
+                        summary = (string)p.Attribute("Description") ?? "No description available.",
+                        type = "Property",
+                    };
                 })
+                // Group by property name and select the one with the best description
+                // This avoids duplicate properties appearing in the final yaml
+                .GroupBy(p => p.name)
+                .Select(g => g.OrderByDescending(p => p.summary != "No description available.").First())
                 .ToList();
 
             // Combine the operator item and property items into a single list
